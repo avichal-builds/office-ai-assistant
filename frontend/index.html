@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Office AI Assistant</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/app.js" defer></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="bg-[#0B1120] text-white min-h-screen">
+
+<div x-data="officeAssistant()" class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-[#111C2E] border-r border-slate-800 p-5 hidden md:flex flex-col">
+
+        <div class="flex items-center gap-3 mb-10">
+            <div class="bg-teal-400/10 p-2 rounded-xl">
+                <i data-lucide="brain-circuit" class="text-teal-400"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg">Office AI</h1>
+                <p class="text-xs text-slate-400">Intelligent Workspace</p>
+            </div>
+        </div>
+
+        <button class="flex items-center gap-3 bg-teal-400 text-slate-950 font-semibold rounded-xl px-4 py-3 mb-8 hover:bg-teal-300 transition"
+                @click="newChat()">
+            <i data-lucide="plus" class="w-5"></i>
+            New Chat
+        </button>
+
+        <p class="text-xs text-slate-500 uppercase tracking-wider mb-4">
+            Workspace
+        </p>
+
+        <nav class="space-y-2">
+
+            <a href="#" class="nav-item active">
+                <i data-lucide="message-square"></i>
+                AI Assistant
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="users"></i>
+                Employees
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="calendar-days"></i>
+                Attendance
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="wallet"></i>
+                Payroll
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="folder-open"></i>
+                Documents
+            </a>
+
+        </nav>
+
+        <div class="mt-auto border-t border-slate-800 pt-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
+                    <i data-lucide="user"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium">Administrator</p>
+                    <p class="text-xs text-slate-400">Office Management</p>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-h-screen">
+
+        <!-- Header -->
+        <header class="h-16 border-b border-slate-800 flex items-center justify-between px-6">
+
+            <div>
+                <h2 class="font-semibold">AI Assistant</h2>
+                <p class="text-xs text-slate-400">Your intelligent office companion</p>
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-teal-400">
+                <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                AI System Online
+            </div>
+
+        </header>
+
+        <!-- Chat Area -->
+        <section class="flex-1 flex flex-col items-center justify-center px-5 py-10">
+
+            <div class="max-w-3xl w-full">
+
+                <div class="text-center mb-10">
+
+                    <div class="inline-flex p-4 rounded-2xl bg-teal-400/10 mb-5">
+                        <i data-lucide="brain-circuit" class="w-9 h-9 text-teal-400"></i>
+                    </div>
+
+                    <h1 class="flex items-center justify-center gap-2 text-3xl md:text-4xl font-bold mb-4">
+    <img class="h-10 w-10 md:h-12 md:w-12 object-contain" alt="Logo" src="./images/logo.png">
+    <span>Good morning!</span>
+</h1>
+
+<p class="text-slate-400 text-base">
+    What would you like to know about your office today?
+</p>
+
+                </div>
+
+                <!-- Suggestions -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+
+                    <button class="suggestion-card"
+                            @click="question = 'Show me employee information'">
+                        <i data-lucide="users" class="text-teal-400 mb-3"></i>
+                        <p class="font-medium">Employee Information</p>
+                        <p class="text-xs text-slate-400 mt-1">Explore employee records</p>
+                    </button>
+
+                    <button class="suggestion-card"
+                            @click="question = 'Show January leave report'">
+                        <i data-lucide="calendar-check" class="text-teal-400 mb-3"></i>
+                        <p class="font-medium">Leave Analytics</p>
+                        <p class="text-xs text-slate-400 mt-1">View attendance and leaves</p>
+                    </button>
+
+                    <button class="suggestion-card"
+                            @click="question = 'Show employee payroll information'">
+                        <i data-lucide="wallet" class="text-teal-400 mb-3"></i>
+                        <p class="font-medium">Payroll Insights</p>
+                        <p class="text-xs text-slate-400 mt-1">Explore payroll information</p>
+                    </button>
+
+                    <button class="suggestion-card"
+                            @click="question = 'Explain company leave policy'">
+                        <i data-lucide="file-text" class="text-teal-400 mb-3"></i>
+                        <p class="font-medium">Company Policies</p>
+                        <p class="text-xs text-slate-400 mt-1">Find answers in documents</p>
+                    </button>
+
+                </div>
+
+
+<!-- Conversation Messages -->
+<div class="space-y-5 mb-6"
+     x-show="messages.length > 0">
+
+    <template x-for="(message, index) in messages" :key="index">
+
+        <div class="flex gap-3"
+             :class="message.role === 'user' ? 'justify-end' : 'justify-start'">
+
+            <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6"
+                 :class="message.role === 'user'
+                    ? 'bg-teal-400 text-slate-950'
+                    : 'bg-[#17263A] text-slate-200 border border-slate-700'">
+
+                <p x-text="message.content"></p>
+
+            </div>
+
+        </div>
+
+    </template>
+
+    <div x-show="loading"
+         class="flex justify-start">
+        <div class="bg-[#17263A] border border-slate-700 rounded-2xl px-4 py-3 text-sm text-teal-300">
+            AI is thinking...
+        </div>
+    </div>
+
+</div>
+
+                <!-- Chat Input -->
+                <form @submit.prevent="sendMessage()"
+                      class="bg-[#17263A] border border-slate-700 rounded-2xl p-3">
+
+                    <textarea
+                        x-model="question"
+                        @keydown.enter.prevent="if (!$event.shiftKey) sendMessage(); else question += '\n'"
+                        placeholder="Ask anything about your office..."
+                        rows="1"
+                        class="w-full bg-transparent outline-none resize-none text-white placeholder-slate-500 p-2"
+                    ></textarea>
+
+                    <div class="flex justify-between items-center mt-2">
+
+                        <span class="text-xs text-slate-500">
+                            Powered by Yuvi AI
+                        </span>
+
+                        <button
+                            type="submit"
+                            :disabled="!question.trim() || loading"
+                            class="flex items-center gap-2 bg-teal-400 text-slate-950 px-5 py-3 rounded-xl font-semibold hover:bg-teal-300 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <span x-text="loading ? 'Thinking...' : 'Send'"></span>
+                            <span>➤</span>
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+        <footer class="text-center text-xs text-slate-600 pb-5">
+            Office AI Assistant · Private Workspace
+        </footer>
+
+    </main>
+
+</div>
+
+</body>
+</html>
