@@ -11,6 +11,7 @@ A private, self-hosted AI assistant that answers questions about your office dat
 
 ## Table of Contents
 
+- [Quick Start (Step-by-Step Setup)](#quick-start-step-by-step-setup)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Project Structure](#project-structure)
@@ -28,6 +29,145 @@ A private, self-hosted AI assistant that answers questions about your office dat
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
+
+---
+
+## Quick Start (Step-by-Step Setup)
+
+Follow these steps exactly, in order, on a new machine. Total time is about 10–15 minutes, most of it spent downloading the model.
+
+### Before you begin: files the original archive is missing
+
+The original archive is **not** setup-ready by itself. Fix these first:
+
+| Missing / broken | Why it blocks setup | Fix |
+|---|---|---|
+| `requirements.txt` is empty | `pip install -r requirements.txt` installs nothing → `ModuleNotFoundError: fastapi` | Use the `requirements.txt` provided with this README |
+| `venv/` folder shipped in the zip | Built on another machine (Linux, Python 3.14, `/home/avichal/...`) — it **does not work** on any other computer | Delete it and create your own (Step 3) |
+| Ollama + model not bundled | Backend runs, but every answer is `Ollama connection error` | Install Ollama and pull the model (Step 2) |
+| No `.gitignore` | `venv/` and `__pycache__/` get committed | Use the `.gitignore` provided with this README |
+
+Non-blocking (the app still works, but looks incomplete): icons don't render and `style.css` is empty. See [Known Issues](#known-issues).
+
+### Step 1 — Install Python
+
+Install **Python 3.11 or newer** from <https://www.python.org/downloads/>.
+On Windows, tick **"Add Python to PATH"** in the installer.
+
+```bash
+python --version        # Windows
+python3 --version       # macOS / Linux
+```
+
+### Step 2 — Install Ollama and download the model
+
+1. Download and install Ollama from <https://ollama.com/download>, or on Linux run:
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+2. Download the model (~2 GB, one time only):
+   ```bash
+   ollama pull llama3.2
+   ```
+3. Check that Ollama is running:
+   ```bash
+   curl http://localhost:11434/api/tags
+   ```
+   If you get "connection refused", start it with `ollama serve` (keep that terminal open). On Windows and macOS, Ollama usually runs automatically in the system tray.
+
+### Step 3 — Prepare the project
+
+```bash
+cd office-ai-assistant
+```
+
+Delete the shipped `venv/` folder and any `__pycache__/` folders, copy in the provided `requirements.txt` and `.gitignore`, then create a fresh virtual environment:
+
+**macOS / Linux**
+```bash
+rm -rf venv app/__pycache__
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+**Windows (PowerShell)**
+```powershell
+Remove-Item -Recurse -Force venv, app\__pycache__ -ErrorAction SilentlyContinue
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+> On Windows, if PowerShell blocks activation, run this once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`. Or use Command Prompt with `venv\Scripts\activate.bat`.
+
+Once the environment is active, your prompt shows `(venv)`.
+
+### Step 4 — Check the sample data
+
+`data/sample_employees/employees.xlsx` is included. If it is missing, generate it **from the project root**:
+
+```bash
+python app/create_sample_data.py
+```
+
+### Step 5 — Start the backend (Terminal 1)
+
+From the **project root** (the folder that contains `app/`), with `venv` active:
+
+```bash
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Open <http://127.0.0.1:8000/>. You should see `{"message":"Office AI Assistant API is running"}`.
+
+> ❌ Do **not** `cd app` first. Starting from inside `app/` fails with `ModuleNotFoundError: No module named 'app'`.
+
+### Step 6 — Start the frontend (Terminal 2)
+
+The frontend **must** run on port **5500**, because the backend's CORS settings only allow that port.
+
+```bash
+cd frontend
+python -m http.server 5500
+```
+
+(If you use VS Code, you can instead right-click `frontend/index.html` and choose **Open with Live Server**, which also uses port 5500.)
+
+### Step 7 — Use it
+
+Open **<http://127.0.0.1:5500>** and ask, for example:
+
+- *What is Avichal's designation?*
+- *Who works in the HR department?*
+- *Who joined the company first?*
+
+The first answer can take 10–60 seconds while the model loads into memory. Later answers are faster.
+
+> Do not open `index.html` by double-clicking it (`file://...`). The browser blocks the API call because of CORS. Always use `http://127.0.0.1:5500`.
+
+### Setup checklist
+
+| Check | Expected |
+|---|---|
+| `curl http://localhost:11434/api/tags` | JSON that lists `llama3.2` |
+| <http://127.0.0.1:8000/> | `Office AI Assistant API is running` |
+| <http://127.0.0.1:8000/docs> | Swagger UI |
+| <http://127.0.0.1:5500> | Chat page loads |
+| Ask a question | A real answer, not `Ollama connection error` or `Unable to connect to AI server` |
+
+### Every time after the first setup
+
+```bash
+# Terminal 1 (project root)
+source venv/bin/activate          # Windows: venv\Scripts\activate
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 2
+cd frontend && python -m http.server 5500
+```
+
+Make sure Ollama is running as well.
 
 ---
 
